@@ -66,6 +66,5 @@ Data_Scraper_df <- function(df){
     )
   }) %>%
     data.table::rbindlist(., fill=TRUE)
-
 }
 

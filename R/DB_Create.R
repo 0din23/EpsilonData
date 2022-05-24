@@ -25,7 +25,7 @@ DB_Create <- function(DB_NAME, DB_DIR, DB_TC){
   # TS Table -------------------------------------------------------------------
   ## Asset Prices
   mAssets <- mData %>%
-    filter(as.logical(HLOC)) %>%
+    filter(as.logical(ASSET)) %>%
     mutate(FROM = "1900-01-01",
            TO = Sys.Date()) %>%
     select(QUELLE, KEY, NAME,FROM, TO)
@@ -35,7 +35,7 @@ DB_Create <- function(DB_NAME, DB_DIR, DB_TC){
 
   ## Indicators
   mIndicators <- mData %>%
-    filter(!as.logical(HLOC)) %>%
+    filter(!as.logical(ASSET)) %>%
     mutate(FROM = "1900-01-01",
            TO = Sys.Date()) %>%
     select(QUELLE, KEY, NAME, FROM, TO)
