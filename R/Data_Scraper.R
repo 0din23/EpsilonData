@@ -16,19 +16,21 @@ Data_Scraper <- function(QUELLE, KEY, NAME = NULL, FROM = NULL, TO=NULL, Reporti
 
   ## Load TS
   if(QUELLE == "DBB"){
-    ts <- pdfetch::pdfetch_BUNDESBANK(KEY)
-    ts <- ts %>%
-      data.frame() %>%
-      dplyr::mutate(date = rownames(ts)) %>%
-      dplyr::select(date, all_of(KEY))
-    if(!is.null(NAME)){
-      colnames(ts) <- c("date", NAME)
-    }
+    ts <- pdfetch::pdfetch_BUNDESBANK("BBDP1.M.DE.Y.APT1.G.GP09SA000000.I15.A") %>%
+      data.frame()
+    ts <- data.frame(
+      "symbol" = as.character(KEY),
+      "date"=as.character(rownames(ts)),
+      "price"=as.numeric(ts[,1])
+    )
+
   } else if(QUELLE == "Yahoo"){
     ts <- tidyquant::tq_get(KEY)
   } else if(QUELLE == "FRED"){
     ts <- tidyquant::tq_get(KEY, "economic.data") %>%
-      select(symbol, date, price)
+      mutate(date = as.character(date)) %>%
+      select(symbol, date, price) %>%
+      as.data.frame()
   } else if(QUELLE == "BOE"){
   }
 
