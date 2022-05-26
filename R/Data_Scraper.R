@@ -16,7 +16,7 @@ Data_Scraper <- function(QUELLE, KEY, NAME = NULL, FROM = NULL, TO=NULL, Reporti
 
   ## Load TS
   if(QUELLE == "DBB"){
-    ts <- pdfetch::pdfetch_BUNDESBANK("BBDP1.M.DE.Y.APT1.G.GP09SA000000.I15.A") %>%
+    ts <- pdfetch::pdfetch_BUNDESBANK(KEY) %>%
       data.frame()
     ts <- data.frame(
       "symbol" = as.character(KEY),
