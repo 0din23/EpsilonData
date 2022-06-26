@@ -1,5 +1,4 @@
-# A Function to use a ticker Catalogue to create a DB for the 0din Capital Infrastructure from scratch
-
+# A Function loading a huge Number of tickers and creates a sqllite database housing the price timeseries of it.
 #' Calculates a bunch of transformations on OHLC long format data
 #'
 #' @param DB_NAME Name for the resulting database
@@ -90,12 +89,14 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
 
   # Table to save the creation date --------------------------------------------
   update_TABLE <- data.frame(
-    "date"=Sys.Date()
+    "date"=Sys.Date() %>% as.character()
   )
 
   # Write to DB ----------------------------------------------------------------
   MData <- MData %>%
     filter(!(symbol %in% new_ticker))
+  StockTS <- StockTS %>%
+    mutate(date = as.character(date))
   RSQLite::dbWriteTable(conn, "Meta_TABLE", MData, append = FALSE, overwrite=TRUE)
   RSQLite::dbWriteTable(conn, "StockTS_TABLE", StockTS, append = FALSE, overwrite=TRUE)
   RSQLite::dbWriteTable(conn, "Update_TABLE", update_TABLE, append = FALSE, overwrite=TRUE)

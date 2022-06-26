@@ -7,7 +7,7 @@
 #' @param DB_TC Ticker Catalogue File
 #' @return Nothing but creates a DB in a directory
 
-YahooDB_Create <- function(DB_NAME, DB_DIR){
+YahooDB_Update <- function(DB_NAME, DB_DIR){
 
   # innit ----------------------------------------------------------------------
   require(dplyr)
@@ -26,7 +26,6 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
     pull(symbol) %>%
     unique()
 
-
   # TS Table -------------------------------------------------------------------
   steps <- floor(length(TICKER) / 10)
   for(k in 1:10){
@@ -41,10 +40,10 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
                volume, adjusted = "price_adjusted")
 
     } else if(k == 10) {
-      w <- c((k*steps + 1):nlegth(TICKER))
+      w <- c((k*steps + 1):length(TICKER))
       data <- yfR::yf_get(
         tickers = TICKER[w],
-        firstdate = start_date,
+        first_date = start_date,
         thresh_bad_data = 0
       ) %>%
         select(date = "ref_date", symbol="ticker", open = "price_open",
@@ -58,7 +57,7 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
       w <- c(((k-1)*steps):(k*steps))
       data <- yfR::yf_get(
         tickers = TICKER[w],
-        firstdate = start_date,
+        first_date = start_date,
         thresh_bad_data = 0
       ) %>%
         select(date = "ref_date", symbol="ticker", open = "price_open",
@@ -74,7 +73,7 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
   new_ticker <- TICKER[!(TICKER %in% ticker)]
   data <- yfR::yf_get(
     tickers = new_ticker,
-    firstdate = start_date,
+    first_date = start_date,
     thresh_bad_data = 0
   ) %>%
     select(date = "ref_date", symbol="ticker", open = "price_open",
@@ -86,13 +85,15 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
 
   # Table to save the creation date --------------------------------------------
   update_TABLE <- data.frame(
-    "date"=Sys.Date()
+    "date"=Sys.Date() %>% as.character()
   )
+  StockTS <- StockTS %>%
+    mutate(date = as.character(date))
 
   # Write to DB ----------------------------------------------------------------
   RSQLite::dbWriteTable(conn, "StockTS_TABLE", StockTS, append = TRUE, overwrite= FALSE)
   RSQLite::dbWriteTable(conn, "Update_TABLE", update_TABLE, append = FALSE, overwrite=TRUE)
-  print(cat("Created:", DB_NAME, "\nIn Folder:", DB_DIR))
+  print(cat("Updated:", DB_NAME, "\nIn Folder:", DB_DIR))
 }
 
 
