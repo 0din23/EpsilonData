@@ -8,7 +8,7 @@ Epsilon_Data_Loader <- function(ticker, db_type, MacroDB = MacroDB_FILE,
       filter(symbol %in% ticker)
   } else if(db_type == "macro"){
     conn <- RSQLite::dbConnect(RSQLite::SQLite(), MacroDB)
-    data <- dplyr::tbl(conn, "Update_TABLE") %>%
+    data <- dplyr::tbl(conn, "Indicator_TS") %>%
       data.frame() %>%
       filter(symbol %in% ticker)
   }
