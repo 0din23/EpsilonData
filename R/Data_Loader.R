@@ -11,6 +11,11 @@ Epsilon_Data_Loader <- function(ticker, db_type, MacroDB = MacroDB_FILE,
     data <- dplyr::tbl(conn, "Indicator_TS") %>%
       filter(symbol %in% ticker) %>%
       data.frame()
+  } else if(db_type == "etf"){
+    conn <- RSQLite::dbConnect(RSQLite::SQLite(), MacroDB)
+    data <- dplyr::tbl(conn, "Asset_Price_TS") %>%
+      filter(symbol %in% ticker) %>%
+      data.frame()
   }
   return(data)
 }
