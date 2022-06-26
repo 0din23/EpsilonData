@@ -1,0 +1,100 @@
+# A Function to use a ticker Catalogue to create a DB for the 0din Capital Infrastructure from scratch
+
+#' Calculates a bunch of transformations on OHLC long format data
+#'
+#' @param DB_NAME Name for the resulting database
+#' @param DB_DIR Directory in which to put the database
+#' @param DB_TC Ticker Catalogue File
+#' @return Nothing but creates a DB in a directory
+
+YahooDB_Create <- function(DB_NAME, DB_DIR){
+
+  # innit ----------------------------------------------------------------------
+  require(dplyr)
+  require(tidyquant)
+  require(EpsilonUtility)
+
+  # Connect to DB
+  db_file <-paste0(DB_DIR, "/", DB_NAME, ".db")
+  conn <- RSQLite::dbConnect(RSQLite::SQLite(),db_file)
+
+  # Metadata -------------------------------------------------------------------
+  update_table <- dplyr::tbl(conn, "Update_TABLE") %>%
+    data.frame()
+  start_date <- update_table[1,1] %>% as.Date()
+  TICKER <- dplyr::tbl(conn, "Meta_TABLE") %>%
+    pull(symbol) %>%
+    unique()
+
+
+  # TS Table -------------------------------------------------------------------
+  steps <- floor(length(TICKER) / 10)
+  for(k in 1:10){
+    if(k == 1){
+      StockTS <- yfR::yf_get(
+        tickers = TICKER[1:steps],
+        first_date = start_date,
+        thresh_bad_data = 0
+      ) %>%
+        select(date = "ref_date", symbol="ticker", open = "price_open",
+               high="price_high", low="price_low", close= "price_close",
+               volume, adjusted = "price_adjusted")
+
+    } else if(k == 10) {
+      w <- c((k*steps + 1):nlegth(TICKER))
+      data <- yfR::yf_get(
+        tickers = TICKER[w],
+        firstdate = start_date,
+        thresh_bad_data = 0
+      ) %>%
+        select(date = "ref_date", symbol="ticker", open = "price_open",
+               high="price_high", low="price_low", close= "price_close",
+               volume, adjusted = "price_adjusted")
+      StockTS <- StockTS %>%
+        rbind(.,
+              data)
+
+    } else {
+      w <- c(((k-1)*steps):(k*steps))
+      data <- yfR::yf_get(
+        tickers = TICKER[w],
+        firstdate = start_date,
+        thresh_bad_data = 0
+      ) %>%
+        select(date = "ref_date", symbol="ticker", open = "price_open",
+               high="price_high", low="price_low", close= "price_close",
+               volume, adjusted = "price_adjusted")
+      StockTS <- StockTS %>%
+        rbind(.,
+              data)
+
+    }
+  }
+  ticker <- StockTS %>% pull(symbol) %>% unique()
+  new_ticker <- TICKER[!(TICKER %in% ticker)]
+  data <- yfR::yf_get(
+    tickers = new_ticker,
+    firstdate = start_date,
+    thresh_bad_data = 0
+  ) %>%
+    select(date = "ref_date", symbol="ticker", open = "price_open",
+           high="price_high", low="price_low", close= "price_close",
+           volume, adjusted = "price_adjusted")
+  StockTS <- StockTS %>%
+    rbind(.,
+          data)
+
+  # Table to save the creation date --------------------------------------------
+  update_TABLE <- data.frame(
+    "date"=Sys.Date()
+  )
+
+  # Write to DB ----------------------------------------------------------------
+  RSQLite::dbWriteTable(conn, "StockTS_TABLE", StockTS, append = TRUE, overwrite= FALSE)
+  RSQLite::dbWriteTable(conn, "Update_TABLE", update_TABLE, append = FALSE, overwrite=TRUE)
+  print(cat("Created:", DB_NAME, "\nIn Folder:", DB_DIR))
+}
+
+
+
+
