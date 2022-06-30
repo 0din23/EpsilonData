@@ -93,7 +93,7 @@ YahooDB_Update <- function(DB_NAME, DB_DIR){
   # Write to DB ----------------------------------------------------------------
   RSQLite::dbWriteTable(conn, "StockTS_TABLE", StockTS, append = TRUE, overwrite= FALSE)
   RSQLite::dbWriteTable(conn, "Update_TABLE", update_TABLE, append = FALSE, overwrite=TRUE)
-  print(cat("Updated:", DB_NAME, "\nIn Folder:", DB_DIR))
+  print(cat("Updated:", DB_NAME))
 }
 
 
