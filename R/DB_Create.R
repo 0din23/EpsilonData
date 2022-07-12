@@ -50,8 +50,7 @@ DB_Create <- function(DB_NAME, DB_DIR, DB_TC){
 
   # Update Table ---------------------------------------------------------------
   dfUpdate <- data.frame(
-    "Table_Name"=c("Meta_Table", "Asset_Price_TS", "Indicator_TS"),
-    "Last_Update"=as.character(rep(Sys.Date(), ))
+    "date"=Sys.Date() %>% as.character()
   )
   RSQLite::dbWriteTable(conn, "Update_TABLE", dfUpdate, append = FALSE, overwrite=TRUE)
   print(cat("Created:", DB_NAME, "\nIn Folder:", DB_DIR))
