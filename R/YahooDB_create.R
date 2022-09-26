@@ -21,11 +21,11 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
           tq_index("SP400"),
           tq_index("SP600")
     ) %>%
-    select(-c(shares_held, weight)) %>%
-    distinct()
+    dplyr::select(-c(shares_held, weight)) %>%
+    dplyr::distinct()
 
   # TS Table -------------------------------------------------------------------
-  TICKER <- MData %>% pull(symbol) %>% unique()
+  TICKER <- MData %>% dplyr::pull(symbol) %>% unique()
   steps <- floor(length(TICKER) / 10)
   for(k in 1:10){
     if(k == 1){
@@ -34,7 +34,7 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
         first_date = "1900-01-01",
         thresh_bad_data = 0
       ) %>%
-        select(date = "ref_date", symbol="ticker", open = "price_open",
+        dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
                high="price_high", low="price_low", close= "price_close",
                volume, adjusted = "price_adjusted")
 
@@ -45,7 +45,7 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
         first_date = "1900-01-01",
         thresh_bad_data = 0
       ) %>%
-        select(date = "ref_date", symbol="ticker", open = "price_open",
+        dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
                high="price_high", low="price_low", close= "price_close",
                volume, adjusted = "price_adjusted")
       StockTS <- StockTS %>%
@@ -59,7 +59,7 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
         first_date = "1900-01-01",
         thresh_bad_data = 0
       ) %>%
-        select(date = "ref_date", symbol="ticker", open = "price_open",
+        dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
                high="price_high", low="price_low", close= "price_close",
                volume, adjusted = "price_adjusted")
       StockTS <- StockTS %>%
@@ -68,21 +68,21 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
 
     }
   }
-  ticker <- StockTS %>% pull(symbol) %>% unique()
+  ticker <- StockTS %>% dplyr::pull(symbol) %>% unique()
   new_ticker <- TICKER[!(TICKER %in% ticker)]
   data <- yfR::yf_get(
     tickers = new_ticker,
     first_date = "1900-01-01",
     thresh_bad_data = 0
   ) %>%
-    select(date = "ref_date", symbol="ticker", open = "price_open",
+    dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
            high="price_high", low="price_low", close= "price_close",
            volume, adjusted = "price_adjusted")
   StockTS <- StockTS %>%
     rbind(.,
           data)
 
-  ticker <- StockTS %>% pull(symbol) %>% unique()
+  ticker <- StockTS %>% dplyr::pull(symbol) %>% unique()
   new_ticker <- TICKER[!(TICKER %in% ticker)]
 
   # Table to save the creation date --------------------------------------------
@@ -92,9 +92,9 @@ YahooDB_Create <- function(DB_NAME, DB_DIR){
 
   # Write to DB ----------------------------------------------------------------
   MData <- MData %>%
-    filter(!(symbol %in% new_ticker))
+    dplyr::filter(!(symbol %in% new_ticker))
   StockTS <- StockTS %>%
-    mutate(date = as.character(date))
+    dplyr::mutate(date = as.character(date))
   RSQLite::dbWriteTable(conn, "Meta_TABLE", MData, append = FALSE, overwrite=TRUE)
   RSQLite::dbWriteTable(conn, "StockTS_TABLE", StockTS, append = FALSE, overwrite=TRUE)
   RSQLite::dbWriteTable(conn, "Update_TABLE", update_TABLE, append = FALSE, overwrite=TRUE)

@@ -20,7 +20,7 @@ YahooDB_Update <- function(DB_NAME, DB_DIR){
     data.frame()
   start_date <- update_table[1,1] %>% as.Date()
   TICKER <- dplyr::tbl(conn, "Meta_TABLE") %>%
-    pull(symbol) %>%
+    dplyr::pull(symbol) %>%
     unique()
 
   # TS Table -------------------------------------------------------------------
@@ -32,7 +32,7 @@ YahooDB_Update <- function(DB_NAME, DB_DIR){
         first_date = start_date,
         thresh_bad_data = 0
       ) %>%
-        select(date = "ref_date", symbol="ticker", open = "price_open",
+        dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
                high="price_high", low="price_low", close= "price_close",
                volume, adjusted = "price_adjusted")
 
@@ -43,7 +43,7 @@ YahooDB_Update <- function(DB_NAME, DB_DIR){
         first_date = start_date,
         thresh_bad_data = 0
       ) %>%
-        select(date = "ref_date", symbol="ticker", open = "price_open",
+        dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
                high="price_high", low="price_low", close= "price_close",
                volume, adjusted = "price_adjusted")
       StockTS <- StockTS %>%
@@ -57,7 +57,7 @@ YahooDB_Update <- function(DB_NAME, DB_DIR){
         first_date = start_date,
         thresh_bad_data = 0
       ) %>%
-        select(date = "ref_date", symbol="ticker", open = "price_open",
+        dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
                high="price_high", low="price_low", close= "price_close",
                volume, adjusted = "price_adjusted")
       StockTS <- StockTS %>%
@@ -66,14 +66,14 @@ YahooDB_Update <- function(DB_NAME, DB_DIR){
 
     }
   }
-  ticker <- StockTS %>% pull(symbol) %>% unique()
+  ticker <- StockTS %>% dplyr::pull(symbol) %>% unique()
   new_ticker <- TICKER[!(TICKER %in% ticker)]
   data <- yfR::yf_get(
     tickers = new_ticker,
     first_date = start_date,
     thresh_bad_data = 0
   ) %>%
-    select(date = "ref_date", symbol="ticker", open = "price_open",
+    dplyr::select(date = "ref_date", symbol="ticker", open = "price_open",
            high="price_high", low="price_low", close= "price_close",
            volume, adjusted = "price_adjusted")
   StockTS <- StockTS %>%
@@ -85,7 +85,7 @@ YahooDB_Update <- function(DB_NAME, DB_DIR){
     "date"=Sys.Date() %>% as.character()
   )
   StockTS <- StockTS %>%
-    mutate(date = as.character(date))
+    dplyr::mutate(date = as.character(date))
 
   # Write to DB ----------------------------------------------------------------
   RSQLite::dbWriteTable(conn, "StockTS_TABLE", StockTS, append = TRUE, overwrite= FALSE)

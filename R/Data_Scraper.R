@@ -13,6 +13,7 @@ Data_Scraper <- function(QUELLE, KEY, NAME = NULL, FROM = NULL, TO=NULL, Reporti
 
   ## Innit
   require(data.table)
+  require(dplyr)
 
   ## Load TS
   if(QUELLE == "DBB"){
@@ -28,8 +29,8 @@ Data_Scraper <- function(QUELLE, KEY, NAME = NULL, FROM = NULL, TO=NULL, Reporti
     ts <- tidyquant::tq_get(KEY)
   } else if(QUELLE == "FRED"){
     ts <- tidyquant::tq_get(KEY, "economic.data") %>%
-      mutate(date = as.character(date)) %>%
-      select(symbol, date, price) %>%
+      dplyr::mutate(date = as.character(date)) %>%
+      dplyr::select(symbol, date, price) %>%
       as.data.frame()
   } else if(QUELLE == "BOE"){
   }
