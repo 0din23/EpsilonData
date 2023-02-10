@@ -38,7 +38,7 @@ DB_Create <- function(DB_NAME, DB_DIR, DB_TC){
     filter(!as.logical(ASSET)) %>%
     mutate(FROM = "1900-01-01",
            TO = Sys.Date()) %>%
-    select(QUELLE, KEY, NAME, FROM, TO)
+    select(QUELLE, KEY, NAME, FROM, TO, Reporting_Lag)
   dfIndicators <- Data_Scraper_df(mIndicators) %>%
     mutate(date = as.character(date))
   RSQLite::dbWriteTable(conn, "Indicator_TS", dfIndicators, append = FALSE, overwrite=TRUE)
