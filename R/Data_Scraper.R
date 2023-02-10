@@ -36,7 +36,7 @@ Data_Scraper <- function(QUELLE, KEY, NAME = NULL, FROM = NULL, TO=NULL, Reporti
   }
 
   ## Process TS
-  if(!is.null(Reporting_Lag)){
+  if(!is.null(Reporting_Lag) & (!is.na(Reporting_Lag))){
     ts$date <- as.character(Reporting_Lag + as.Date(ts$date))
   }
   if(!is.null(FROM)){
